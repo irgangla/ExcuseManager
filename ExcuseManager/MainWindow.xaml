@@ -5,8 +5,82 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExcuseManager"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
-    </Grid>
+        Title="Excuse Manager" Height="250" Width="400">
+    <Window.CommandBindings>
+        <CommandBinding Command="local:ExcuseCommands.Open" CanExecute="Open_CanExecute" Executed="Open_Execute"/>
+        <CommandBinding Command="local:ExcuseCommands.Create" CanExecute="Create_CanExecute" Executed="Create_Execute"/>
+        <CommandBinding Command="local:ExcuseCommands.Save" CanExecute="Save_CanExecute" Executed="Save_Execute"/>
+        <CommandBinding Command="local:ExcuseCommands.Exit" CanExecute="Exit_CanExecute" Executed="Exit_Execute"/>
+        <CommandBinding Command="local:ExcuseCommands.Random" CanExecute="Random_CanExecute" Executed="Random_Execute"/>
+        <CommandBinding Command="local:ExcuseCommands.New" CanExecute="New_CanExecute" Executed="New_Execute"/>
+        <CommandBinding Command="local:ExcuseCommands.Next" CanExecute="Next_CanExecute" Executed="Next_Execute"/>
+        <CommandBinding Command="local:ExcuseCommands.Previous" CanExecute="Previous_CanExecute" Executed="Previous_Execute"/>
+    </Window.CommandBindings>
+    <Window.Resources>
+        <local:InverseBooleanConverter x:Key="inverseBoolean" />
+        <ControlTemplate x:Key="validationTemplate">
+            <Grid>
+                <Ellipse Fill="Red" Opacity="0.8" Width="10" Height="10"
+                 HorizontalAlignment="Right" VerticalAlignment="Top"
+                 ToolTip="{Binding Path=/ErrorContent}" />
+                <AdornedElementPlaceholder />
+            </Grid>
+        </ControlTemplate>
+    </Window.Resources>
+    <DockPanel>
+        <Menu x:Name="fileMenu" DockPanel.Dock="Top" VerticalAlignment="Top">
+            <MenuItem x:Name="files" Header="File">
+                <MenuItem x:Name="file" Command="local:ExcuseCommands.Open" />
+                <MenuItem x:Name="create" Command="local:ExcuseCommands.Create" />
+                <MenuItem x:Name="save" Command="local:ExcuseCommands.Save" />
+                <Separator />
+                <MenuItem x:Name="exit" Command="local:ExcuseCommands.Exit" />
+            </MenuItem>
+            <MenuItem x:Name="excuse" Header="Excuse">
+                <MenuItem x:Name="random" Command="local:ExcuseCommands.Random" />
+                <MenuItem x:Name="new" Command="local:ExcuseCommands.New" />
+                <Separator />
+                <MenuItem x:Name="nextMenu" Command="local:ExcuseCommands.Next" />
+                <MenuItem x:Name="previousMenu" Command="local:ExcuseCommands.Previous" />
+            </MenuItem>
+        </Menu>
+        <StatusBar Grid.Row="5" DockPanel.Dock="Bottom" Grid.ColumnSpan="2">
+            <StatusBarItem HorizontalAlignment="Stretch">
+                <Label x:Name="statusLabel" Content="Status" Grid.Column="0"></Label>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <WrapPanel>
+                    <Button x:Name="previous" Content="&lt;" Command="local:ExcuseCommands.Previous" Margin="5,0" />
+                    <ProgressBar Width="200" Height="20" HorizontalAlignment="Right" Grid.Column="1" x:Name="excuseCounter" />
+                    <Button x:Name="next" Content="&gt;" Command="local:ExcuseCommands.Next" Margin="5,0" />
+                </WrapPanel>
+            </StatusBarItem>
+        </StatusBar>
+        <Grid x:Name="contentGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+            <Label x:Name="excuseLabel" Content="Excuse:" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            <Label x:Name="resultLabel" Content="Result:" HorizontalAlignment="Right" Grid.Row="1" VerticalAlignment="Center"/>
+            <TextBox x:Name="excuseBox" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="0" Margin="5,0,10,0" Text="{Binding Path=ExcuseText, ValidatesOnDataErrors=True, Mode=TwoWay}" IsReadOnly="{Binding Path=ReadOnly}" Validation.ErrorTemplate="{StaticResource validationTemplate}" />
+            <TextBox x:Name="resultBox" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Center" Margin="5,0,10,0" Text="{Binding Path=Result, ValidatesOnDataErrors=True, Mode=TwoWay}" IsReadOnly="{Binding Path=ReadOnly}" Validation.ErrorTemplate="{StaticResource validationTemplate}" />
+            <Label x:Name="ratingLabel" Content="Rating:" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            <Label x:Name="usedLabel" Content="Last used:" HorizontalAlignment="Right" Grid.Row="3" VerticalAlignment="Center"/>
+            <WrapPanel x:Name="rating" Grid.Column="1" Grid.Row="2" Margin="5,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                <Polygon Points="{Binding Path=StarPoints}" Fill="Yellow" Stroke="Red" Margin="5,0,5,0" Width="20" Height="20" x:Name="star1" MouseDown="Star_MouseDown" />
+                <Polygon Points="{Binding Path=StarPoints}" Fill="Yellow" Stroke="Red" Margin="5,0,5,0" Width="20" Height="20" x:Name="star2" MouseDown="Star_MouseDown" />
+                <Polygon Points="{Binding Path=StarPoints}" Fill="Yellow" Stroke="Red" Margin="5,0,5,0" Width="20" Height="20" x:Name="star3" MouseDown="Star_MouseDown" />
+                <Polygon Points="{Binding Path=StarPoints}" Fill="Yellow" Stroke="Red" Margin="5,0,5,0" Width="20" Height="20" x:Name="star4" MouseDown="Star_MouseDown" />
+                <Polygon Points="{Binding Path=StarPoints}" Fill="Yellow" Stroke="Red" Margin="5,0,5,0" Width="20" Height="20" x:Name="star5" MouseDown="Star_MouseDown" />
+            </WrapPanel>
+            <DatePicker x:Name="lastUsed" Grid.Column="1" Grid.Row="4" HorizontalAlignment="Left" VerticalAlignment="Center" IsEnabled="{Binding Path=ReadOnly, Converter={StaticResource inverseBoolean}}"  SelectedDate="{Binding Path=Used, ValidatesOnDataErrors=True, Mode=TwoWay}" Margin="5,0,0,0" Validation.ErrorTemplate="{StaticResource validationTemplate}" />
+        </Grid>
+    </DockPanel>
 </Window>
